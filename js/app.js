@@ -18,7 +18,7 @@ const astrologicalSubSeasons = {
   earlyFall: { start: 922, end: 1022 },
   midFall: { start: 1022, end: 1121 },
   lateFall: { start: 1121, end: 1221 },
-  earlyWinter: { start: 1221, end: 1231 },
+  earlyWinter: { start: 1221, end: 1232 },
   earlyWinterTwo: { start: 101, end: 119 },
   midWinter: { start: 119, end: 218 },
   lateWinter: { start: 218, end: 320 },
