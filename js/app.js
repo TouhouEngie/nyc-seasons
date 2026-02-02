@@ -26,14 +26,14 @@ const astrologicalSubSeasons = {
 
 // Mapping to the list index.
 const seasonsIndexes = {
-  "Winter": 0,
+  Winter: 0,
   "Fool's Spring": 1,
   "Second Winter": 2,
   "Spring of Deception": 3,
   "Third Winter": 4,
   "The Pollening": 5,
   "Actual Spring": 6,
-  "Summer": 7,
+  Summer: 7,
   "Hell's Front Porch": 8,
   "False Fall": 9,
   "Second Summer": 10,
@@ -41,10 +41,14 @@ const seasonsIndexes = {
 };
 
 function getMeanAndStd(now) {
-  let dayOfYear = Math.floor(
-    (now - new Date(now.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24
+  // Convert to NYC timezone to match historical data
+  let nycTime = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/New_York" }),
   );
-  let dayHour = `${dayOfYear.toString().padStart(3, "0")}-${now
+  let dayOfYear = Math.floor(
+    (nycTime - new Date(nycTime.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24,
+  );
+  let dayHour = `${dayOfYear.toString().padStart(3, "0")}-${nycTime
     .getHours()
     .toString()
     .padStart(2, "0")}`;
@@ -64,9 +68,14 @@ function checkIfHot(now, tempF) {
 }
 
 function getAstrologicalSubSeason(now) {
-  let day = now.getDate();
-  let month = now.getMonth();
+  // Convert to NYC timezone for consistency
+  let nycTime = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/New_York" }),
+  );
+  let day = nycTime.getDate();
+  let month = nycTime.getMonth();
   let date = ((month + 1)*100) + day;
+
   for (let subSeason in astrologicalSubSeasons) {
     let subSeasonRange = astrologicalSubSeasons[subSeason];
     if (date >= subSeasonRange.start && date < subSeasonRange.end) {
@@ -146,7 +155,7 @@ function getNYCSeason(now, tempF, aqiScore) {
     }
   }
   throw new Exception(
-    "Please email devon@peticol.as with the current date, time, and if you wore a jacket today."
+    "Please email devon@peticol.as with the current date, time, and if you wore a jacket today.",
   );
 }
 
@@ -167,9 +176,13 @@ function describeAqi(aqiScore) {
 function getExplainerString(now, tempF, aqiScore) {
   let { mean, std } = getMeanAndStd(now);
   let tempDeviations = (tempF - mean) / std;
-  let timeParts = now.toString().split(" ");
-  let amPm = now.getHours() < 12 ? "AM" : "PM";
-  let hour = now.getHours() % 12;
+  // Convert to NYC timezone for display
+  let nycTime = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/New_York" }),
+  );
+  let timeParts = nycTime.toString().split(" ");
+  let amPm = nycTime.getHours() < 12 ? "AM" : "PM";
+  let hour = nycTime.getHours() % 12;
   hour = hour === 0 ? 12 : hour;
   let absTempDeviations = Math.abs(tempDeviations);
   let stddevPrefix = "";
@@ -185,7 +198,7 @@ function getExplainerString(now, tempF, aqiScore) {
   } else {
     let warmerColder = tempDeviations > 0 ? "warmer" : "colder";
     str = `It is currently ${stddevPrefix}${absTempDeviations.toFixed(
-      2
+      2,
     )} standard deviations ${warmerColder} than expected for ${timeParts[1]} ${
       timeParts[2]
     }.`;
@@ -216,7 +229,6 @@ window.addEventListener("load", () => {
       fetch(aqiUrl)
         .then((response) => response.json())
         .then((aqiData) => {
-
           let tempK = weatherData.main.feels_like;
           // F stands for Freedom
           let tempF = 1.8 * (tempK - 273) + 32;
@@ -226,7 +238,7 @@ window.addEventListener("load", () => {
           let season = getNYCSeason(now, tempF, aqiScore);
           let explainer = getExplainerString(now, tempF, aqiScore);
 
-          if (now.toDateString() === 'Wed Nov 06 2024') {
+          if (now.toDateString() === "Wed Nov 06 2024") {
             season = "Hell's Front Porch";
           }
 
@@ -252,7 +264,7 @@ window.addEventListener("load", () => {
                     let imageFile = new File(
                       [blob],
                       "12seasons-nyc-" + dateStr() + ".png",
-                      { type: "image/png" }
+                      { type: "image/png" },
                     );
                     let imageUrl = URL.createObjectURL(blob); // Create URL from blob
                     resolve({ imageFile, imageUrl });
@@ -280,7 +292,7 @@ window.addEventListener("load", () => {
                         })
                         .then(() => console.log("Successfully shared"))
                         .catch((error) =>
-                          console.error("Error sharing:", error)
+                          console.error("Error sharing:", error),
                         );
                     });
                 }
